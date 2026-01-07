@@ -1,0 +1,49 @@
+#!/bin/bash
+# Musical0.0.1
+# Module for Ez: play notes and melodies
+
+# Make sure module is aware of Ez variables
+declare -n ez_vars_ref=ez_vars
+
+# Map note names to frequencies (for beep, optional)
+declare -A NOTES
+NOTES["C"]=261
+NOTES["D"]=294
+NOTES["E"]=329
+NOTES["F"]=349
+NOTES["G"]=392
+NOTES["A"]=440
+NOTES["B"]=493
+
+# Play a single note
+function Musical_PlayNote() {
+    local note="$1"
+    local duration="${2:-0.5}"  # default 0.5s
+
+    freq="${NOTES[$note]}"
+
+    # Try beep command if exists
+    if command -v beep >/dev/null 2>&1; then
+        beep -f "$freq" -l $(awk "BEGIN{print $duration*1000}")
+    else
+        # fallback: terminal bell
+        echo -ne "\a"
+        sleep "$duration"
+    fi
+}
+
+# Play a sequence of notes
+# Usage: Musical_PlaySequence("C D E F G", 0.4)
+function Musical_PlaySequence() {
+    local sequence="$1"
+    local duration="${2:-0.5}"
+    for n in $sequence; do
+        Musical_PlayNote "$n" "$duration"
+    done
+}
+
+# Example: musical variables
+# Can be called from Ez scripts:
+# Load Musical
+# Musical_PlayNote("C", 0.3)
+# Musical_PlaySequence("C D E F G", 0.2)
